@@ -2,6 +2,8 @@ w= 1600
 h = 2000
 marg = 100
 
+ratio = h/w
+
 let shade;
 function preload() {
   shade = loadShader("shader.vert", "shader.frag");
@@ -17,10 +19,36 @@ pxSize = url.searchParams.get('size')
 
 //parameters
 numPasses = 0
+looping = true
+pipeDens = randomInt(3, 15)
+
+vals = ['black', 'white']
+hues = [truePal[0], truePal[1]]
+shuff(vals)
+shuff(hues)
+
+bg = [vals[0], hues[0]]
+fg = [vals[1], hues[1]]
+
+
+tiles = []
+pipeA = []
+pipeB = []
+
+roundness = randBool()
+
+for(let i = 0 ; i < pipeDens+1; i++) {
+  pipeA[i] = fg[randomInt(0, 1)]
+  pipeB[i] = fg[randomInt(0, 1)]
+}
+
+pipes = [pipeA, pipeB]
+
 
 $fx.features({
-  "param1": 0,
-  "param2": 0,
+  "Palette": palName,
+  "Round?": roundness,
+  "Pipe Complexity": pipeDens,
 })
 
 function setup() {
@@ -41,18 +69,24 @@ function setup() {
   angleMode(DEGREES)
   p.angleMode(DEGREES)
   c.angleMode(DEGREES)
-  noLoop()
-  p.noLoop()
-  c.noLoop()
+  // noLoop()
+  // p.noLoop()
+  // c.noLoop()
 }
 
 function draw() {
   background(bgc)
-  p.background('white')
+  p.background(bgc)
   c.background(0)
-
+  p.rectMode(CENTER)
   //Sketch
-
+  if(frameCount == 1) {
+    tileGrid()
+  }
+  
+  for(let i = 0; i < tiles.length; i++) {
+    tiles[i].ezCurve()
+  }
   //Post processing
    lastPass = false
    bgc = color(bgc)
@@ -70,20 +104,6 @@ function draw() {
      bgc.levels[1] / 255,
      bgc.levels[2] / 255,
    ]);
-
-   //recursive passes
-   for(let i = 0; i < numPasses; i++) {
-    if(i == 0) {
-      firstPass = true
-    } else {
-      firstPass = false
-    }
-
-    shade.setUniform("firstPass", firstPass)
-    shade.setUniform("p", p)
-    recur.rect(0, 0, w, h)
-    p.image(recur, 0, 0)
-   }
 
    //final display pass
    lastPass = true

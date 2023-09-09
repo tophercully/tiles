@@ -7,8 +7,6 @@ varying vec2 vTexCoord;
 
 //textures and uniforms from p5
 uniform sampler2D p;
-uniform sampler2D g;
-uniform sampler2D c;
 uniform vec2 u_resolution;
 uniform float seed;
 uniform vec3 bgc;
@@ -82,9 +80,6 @@ void main() {
   stB.y = 1.0 - stB.y;
   stDebug.y = 1.0 - stDebug.y;
 
-  //form noise
-  st.xy += map(random(st.xy), 0.0, 1.0, -0.0005, 0.0005);
-
   
   if(lastPass == true) {
     //shrink stB so there is margin
@@ -94,50 +89,16 @@ void main() {
   
   
   //pull in our main textures
-  vec4 texC = texture2D(c, st);
-  vec4 texG = texture2D(g, st);
   vec4 texP = texture2D(p, st);
-  
-  //map luminance as a y value on our gradient
-  vec2 lum = vec2(0.5, texP.r);
-  //pick the color off of g based on luminance
-  vec4 colVal = texture2D(g, lum);
+
 
   //initialize color
   vec3 color = vec3(0.0);
-  
-  //only apply color on the last pass, keep image black and white for now
-  if(lastPass == false) {
-    color = texP.rgb;
-  } else {
-    color = colVal.rgb;
-  }
+  color = texP.rgb;
 
-  //Draw margin, use 0 and 1 since we shrunk stB
-  if(stB.x <= 0.0 || stB.x >= 1.0 || stB.y <= 0.0 || stB.y >= 1.0) {
-    color = bgc;
-  }
+  color+= random(stDebug)*0.075;
 
-  //luminance of C controls opacity of detail
-  float mixAmt = map(texC.r, 0.0, 0.3, 0.0, 1.0);
-  //apply color on last pass and only if its the foreground elements
-  if(lastPass == false && texC.r < 0.3) {
-    color = mix(bgc.rgb, color.rgb, mixAmt);
-  }
-
-  if(lastPass == true) {
-    color = mix(bgc.rgb, color.rgb, texC.r);
-  
-    if(texP.r > 0.5) {
-      if(texC.r < 1.0) {
-        color = adjustSaturation(color, 0.5);
-      }
-    } 
-
-    //color noise
-    float noiseGray = random(st.xy)*0.1;
-    color += noiseGray;
-  }
+  color = adjustSaturation(color, 0.25);
 
   gl_FragColor = vec4(color, 1.0);
 }

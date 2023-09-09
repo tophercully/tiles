@@ -47,6 +47,20 @@ function keyTyped() {
     window.location.reload();
   }
 }
+
+function keyPressed() {
+  if(keyCode == 32) {
+    if(looping == true) {
+      noLoop()
+      looping = false
+    } else {
+      loop()
+      looping = true
+    }
+    
+  }
+}
+
 function updateURLParameter(url, param, paramVal)
 {
     var TheAnchor = null;
@@ -125,6 +139,15 @@ function average(array) {
   });
   return sum / array.length;
 }
+
+function randBool() {
+  if(fxrand() < 0.5) {
+    bool = true
+  } else {
+    bool = false
+  }
+  return bool
+}
 ////////////////////////////////////////
 
 function gradLUT() {
@@ -141,3 +164,24 @@ function gradLUT() {
       g.line(0, y, w,y)
     }
 }
+
+function tileGrid() {
+  cols = randomInt(2, 6)
+  rows = randomInt(2, 8)
+
+  cellW = (w-(marg*2))/cols
+  cellH = (h-(marg*2))/rows
+
+  for(let y = 0; y < rows; y++) {
+    for(let x = 0; x < cols; x++) {
+      here = new Tile(marg+x*cellW+cellW/2, marg+y*cellH+cellH/2, cellW, cellH)
+      tiles.push(here)
+      // here.ezCurve()
+    
+    }
+  }
+
+
+}
+
+
